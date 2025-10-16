@@ -1,0 +1,40 @@
+package com.finalproject.dataplatform.dto.responses;
+
+import java.time.LocalDateTime;
+
+public record OrderResponseDto(
+        String orderId,
+        String customerId,
+        String orderStatus,
+        LocalDateTime orderPurchaseTimestamp,
+        LocalDateTime orderApprovedAt,
+        LocalDateTime orderDeliveredCarrierDate,
+        LocalDateTime orderDeliveredCustomerDate,
+        LocalDateTime orderEstimatedDeliveryDate,
+        Double orderItemId,
+        String productId,
+        String sellerId,
+        LocalDateTime shippingLimitDate,
+        Double price,
+        Double freightValue,
+        Double paymentSequential,
+        String paymentType,
+        Double paymentInstallments,
+        Double paymentValue,
+        String reviewId,
+        Double reviewScore,
+        String reviewCommentTitle,
+        String reviewCommentMessage,
+        LocalDateTime reviewCreationDate,
+        LocalDateTime reviewAnswerTimestamp,
+        String productCategoryName,
+        Double productNameLength,
+        Double productDescriptionLength,
+        Double productPhotosQty,
+        Double productWeightG,
+        Double productLengthCm,
+        Double productHeightCm,
+        Double productWidthCm,
+        String productCategoryNameEnglish
+) {}
+
