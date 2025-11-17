@@ -111,4 +111,9 @@ public class Order {
 
     @Column(name = "product_category_name_english", length = 128)
     private String productCategoryNameEnglish;
+
+    // get the order price
+    public Double getPrice() {
+        return this.price != null ? this.price : 0.0;
+    }
 }
