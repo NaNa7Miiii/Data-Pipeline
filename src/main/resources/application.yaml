@@ -11,7 +11,7 @@ spring:
     show-sql: true
   ai:
     openai:
-      api-key: "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"
+      api-key: ${OPENAI_API_KEY}
       chat:
         options:
           model: gpt-4.1
