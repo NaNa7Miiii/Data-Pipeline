@@ -1,0 +1,59 @@
+{
+  "steps": [
+    {
+      "description": "Reviewing Topic 0: 'Compra não entregue após longo tempo'. Representative texts consistently mention excessive delivery delays, lack of communication or updates, missed delivery deadlines, and customers having to retrieve products themselves. Some mention not receiving products at all or not being able to track their orders.",
+      "action": "Identified main pain points as: long delivery times, lack of proactive communication, missed deadlines, and poor order tracking. Action: Recommend improving logistics, setting realistic delivery expectations, enhancing order tracking, and proactive customer communication regarding delays."
+    },
+    {
+      "description": "Reviewing Topic 4: 'Missing product in purchase order'. Users report receiving incomplete orders (e.g., only part of a multi-item purchase), discrepancies between what was paid for and what was delivered, and lack of clarity or updates about missing items.",
+      "action": "Main issues: incomplete deliveries, poor communication about missing items, and lack of resolution. Action: Improve order fulfillment accuracy, implement better order verification before shipping, and establish clear communication and resolution protocols for missing items."
+    },
+    {
+      "description": "Reviewing Topic 5: 'Produto de baixa qualidade com defeito.' Feedback centers on receiving defective or low-quality products, dissatisfaction with product quality, and products not meeting expectations.",
+      "action": "Main pain points: defective products, poor quality, unmet expectations. Action: Strengthen quality control, set clearer product expectations, and streamline returns/exchanges for defective items."
+    },
+    {
+      "description": "Reviewing Topic 7: 'Product quality issues and customer concerns.' Users mention products not matching expectations from photos, minor defects, and disappointment with material quality, though some are satisfied given the price. Delivery time is also mentioned as a concern.",
+      "action": "Issues: product quality not matching photos, minor defects, and long delivery times. Action: Improve product photography accuracy, set clearer quality expectations, and review delivery timelines."
+    },
+    {
+      "description": "Reviewing Topic 8: 'Products arrived damaged and poorly packaged.' Customers report products arriving damaged, poor packaging, products not matching website images, and feeling misled by product photos.",
+      "action": "Pain points: damaged goods, poor packaging, misleading product images. Action: Enhance packaging standards, ensure product images accurately reflect reality, and improve quality checks before shipping."
+    },
+    {
+      "description": "Reviewing Topic 11: 'Low-quality products with poor functionality.' Complaints include products not functioning as advertised, poor usability, misleading advertising, and products perceived as counterfeit or of extremely low quality.",
+      "action": "Main issues: poor product functionality, misleading advertising, and counterfeit concerns. Action: Vet suppliers more rigorously, ensure accurate product descriptions, and address counterfeit risks."
+    },
+    {
+      "description": "Reviewing Topic 15: 'Relógio com defeito e problemas de uso.' Users received defective watches (e.g., not working, wrong numbers, broken parts), and experienced difficulties with returns or exchanges.",
+      "action": "Pain points: defective products, poor post-sale support, and return/exchange difficulties. Action: Improve product quality checks, streamline return/exchange processes, and enhance customer support responsiveness."
+    },
+    {
+      "description": "Reviewing Topic 18: 'Relógio com defeito ou entrega errada.' Feedback includes receiving damaged or defective watches, missing items, lack of manuals, and counterfeit concerns.",
+      "action": "Issues: defective/damaged products, missing items, lack of documentation, and counterfeit worries. Action: Improve quality control, ensure all items and manuals are included, and address authenticity concerns."
+    },
+    {
+      "description": "Reviewing Topic 19: 'Correios delivery issues and customer frustration.' Customers are frustrated with delivery via Correios, reporting failed home deliveries, poor communication, high shipping costs, and unhelpful customer service.",
+      "action": "Pain points: unreliable delivery, poor communication, high shipping costs, and inadequate customer service. Action: Consider alternative logistics partners, improve delivery tracking and communication, and train customer service staff."
+    }
+  ],
+  "final_resolution": {
+    "summary": "The main negative feedback themes are excessive delivery delays, incomplete or missing items, poor product quality (including defects and counterfeit concerns), misleading product representations, damaged goods due to poor packaging, and significant issues with delivery partners and customer service.",
+    "insights": [
+      "Delivery and logistics are a major source of dissatisfaction, especially with delays, missed deliveries, and lack of communication.",
+      "Product quality and authenticity concerns are widespread, with many reports of defects, poor materials, and products not matching descriptions or images.",
+      "Order fulfillment errors (missing or incomplete orders) and poor packaging are recurring issues.",
+      "Customer service is perceived as unresponsive or unhelpful, especially regarding delivery problems and returns/exchanges."
+    ],
+    "suggestions": [
+      "Partner with more reliable logistics providers and offer alternative delivery options to reduce delays and failed deliveries.",
+      "Enhance order tracking and proactive communication about order status and delays.",
+      "Implement stricter quality control and vetting of suppliers to ensure product quality and authenticity.",
+      "Ensure product images and descriptions accurately reflect the actual products.",
+      "Improve packaging standards to prevent damage during transit.",
+      "Establish robust processes for handling missing or incomplete orders, including clear communication and fast resolution.",
+      "Streamline and improve the returns/exchanges process for defective or unsatisfactory products.",
+      "Invest in customer service training and resources to provide timely, helpful support and clear information."
+    ]
+  }
+}
