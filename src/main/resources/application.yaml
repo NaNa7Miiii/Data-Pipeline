@@ -1,8 +1,8 @@
 spring:
   datasource:
-    url: jdbc:postgresql://localhost:5432/customer_db
+    url: jdbc:postgresql://localhost:5433/customer_db
     username: postgres
-    password: 040000
+    password: pass123
     driver-class-name: org.postgresql.Driver
   jpa:
     hibernate:
@@ -10,14 +10,13 @@ spring:
     database: postgresql
     show-sql: true
   ai:
-    openai:
-      api-key: ${OPENAI_API_KEY}
-      chat:
-        options:
-          model: gpt-4.1
-          temperature: 0.7
-          max-tokens: 1000
-          top-p: 0.9
+    google:
+      genai:
+        api-key: "AIzaSyAa3itjVbXsH_Z8luexrtSPCHJ28Xhcz8U"
+        chat:
+          options:
+            model: gemini-2.5-flash
+            temperature: 0.7
     mcp:
       server:
         enabled: true
