@@ -25,7 +25,7 @@ public interface OrderRepository extends JpaRepository<Order, String> {
         WHERE (o.orderPurchaseTimestamp >= COALESCE(CAST(:startDate AS timestamp), o.orderPurchaseTimestamp))
           AND (o.orderPurchaseTimestamp <= COALESCE(CAST(:endDate AS timestamp), o.orderPurchaseTimestamp))
           AND (LOWER(c.customerCity) = LOWER(COALESCE(CAST(:city AS string), c.customerCity)))
-          AND (o.productCategoryNameEnglish = COALESCE(CAST(:category AS string), o.productCategoryNameEnglish))
+          AND (LOWER(o.productCategoryNameEnglish) = LOWER(COALESCE(CAST(:category AS string), o.productCategoryNameEnglish)))
     """)
     List<OrderCityView> findOrdersByFilters (
             @Param("startDate") LocalDateTime startDate,
@@ -49,5 +49,42 @@ public interface OrderRepository extends JpaRepository<Order, String> {
             @Param("startDate") LocalDateTime startDate,
             @Param("endDate") LocalDateTime endDate,
             @Param("limit") int limit
+    );
+
+    @Query(value = """
+        SELECT o.product_id, COUNT(*) as sales_volume
+        FROM orders o
+        JOIN customers c ON o.customer_id = c.customer_id
+        WHERE (o.order_purchase_timestamp BETWEEN :startDate AND :endDate)
+          AND (LOWER(c.customer_city) = LOWER(COALESCE(CAST(:city AS text), c.customer_city)))
+          AND (LOWER(o.product_category_name_english) = LOWER(COALESCE(CAST(:category AS text), o.product_category_name_english)))
+        GROUP BY o.product_id
+        ORDER BY sales_volume DESC
+        LIMIT :limit
+    """, nativeQuery = true)
+    List<Map<String, Object>> findTopProducts(
+            @Param("startDate") LocalDateTime startDate,
+            @Param("endDate") LocalDateTime endDate,
+            @Param("city") String city,
+            @Param("category") String category,
+            @Param("limit") int limit
+    );
+
+    @Query(value = """
+        SELECT TO_CHAR(o.order_purchase_timestamp, 'YYYY-MM') as month, 
+               SUM(o.price) as total_sales
+        FROM orders o
+        JOIN customers c ON o.customer_id = c.customer_id
+        WHERE (o.order_purchase_timestamp BETWEEN :startDate AND :endDate)
+          AND (LOWER(c.customer_city) = LOWER(COALESCE(CAST(:city AS text), c.customer_city)))
+          AND (LOWER(o.product_category_name_english) = LOWER(COALESCE(CAST(:category AS text), o.product_category_name_english)))
+        GROUP BY month
+        ORDER BY month ASC
+    """, nativeQuery = true)
+    List<Map<String, Object>> findMonthlySalesTrend(
+            @Param("startDate") LocalDateTime startDate,
+            @Param("endDate") LocalDateTime endDate,
+            @Param("city") String city,
+            @Param("category") String category
     );
 }

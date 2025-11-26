@@ -166,4 +166,37 @@ public class OrderInsightServiceImpl implements OrderInsightService {
         }
         return topSellers;
     }
+    @Override
+    @Tool(description = "Identifies the top selling products based on total sales volume within the specified date range.")
+    public Map<String, Integer> getTopProducts(OrderInsightRequestDto request) {
+        LocalDateTime start = parseSmartDate(request.startDate(), true);
+        LocalDateTime end = parseSmartDate(request.endDate(), false);
+
+        List<Map<String, Object>> results = orderRepository.findTopProducts(
+                start, end, request.city(), request.category(), 5);
+        Map<String, Integer> topProducts = new HashMap<>();
+        for (Map<String, Object> row : results) {
+            String productId = (String) row.get("product_id");
+            Integer volume = row.get("sales_volume") != null ? ((Number) row.get("sales_volume")).intValue() : 0;
+            topProducts.put(productId, volume);
+        }
+        return topProducts;
+    }
+
+    @Override
+    @Tool(description = "Analyzes the monthly sales trend (GMV) within the specified date range. Returns a map of 'YYYY-MM' to total sales.")
+    public Map<String, Double> getSalesTrend(OrderInsightRequestDto request) {
+        LocalDateTime start = parseSmartDate(request.startDate(), true);
+        LocalDateTime end = parseSmartDate(request.endDate(), false);
+
+        List<Map<String, Object>> results = orderRepository.findMonthlySalesTrend(
+                start, end, request.city(), request.category());
+        Map<String, Double> trend = new java.util.LinkedHashMap<>(); // 使用 LinkedHashMap 保持月份顺序
+        for (Map<String, Object> row : results) {
+            String month = (String) row.get("month");
+            Double sales = row.get("total_sales") != null ? ((Number) row.get("total_sales")).doubleValue() : 0.0;
+            trend.put(month, sales);
+        }
+        return trend;
+    }
 }

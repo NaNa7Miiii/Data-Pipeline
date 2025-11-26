@@ -41,4 +41,14 @@ public class QueryTools {
     public Map<String, Double> getTopSellers(OrderInsightRequestDto request) {
         return service.getTopSellers(request);
     }
+
+    @Tool(description = "Identifies the top selling products. City and Category are optional filters; if not provided, analyzes global data.")
+    public Map<String, Integer> getTopProducts(OrderInsightRequestDto request) {
+        return service.getTopProducts(request);
+    }
+
+    @Tool(description = "Analyzes the monthly sales trend (GMV). City and Category are optional filters; if not provided, analyzes global data.")
+    public Map<String, Double> getSalesTrend(OrderInsightRequestDto request) {
+        return service.getSalesTrend(request);
+    }
 }

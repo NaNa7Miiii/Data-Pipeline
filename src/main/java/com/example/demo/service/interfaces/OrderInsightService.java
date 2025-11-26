@@ -17,4 +17,6 @@ public interface OrderInsightService {
     Map<String, Integer> getCategoryDistribution(OrderInsightRequestDto request);
     String getOrderStatus(String orderId);
     Map<String, Double> getTopSellers(OrderInsightRequestDto request);
+    Map<String, Integer> getTopProducts(OrderInsightRequestDto request);
+    Map<String, Double> getSalesTrend(OrderInsightRequestDto request);
 }
