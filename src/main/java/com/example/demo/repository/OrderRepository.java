@@ -12,7 +12,6 @@ import java.util.Map;
 
 public interface OrderRepository extends JpaRepository<Order, String> {
 
-    // 使用 CAST(... as timestamp) 和 CAST(... as string) 解决 Postgres 参数类型推断问题
     @Query("""
         SELECT o.orderId as orderId,
                o.customerId as customerId,
@@ -25,7 +24,7 @@ public interface OrderRepository extends JpaRepository<Order, String> {
         JOIN Customer c ON o.customerId = c.customerId
         WHERE (o.orderPurchaseTimestamp >= COALESCE(CAST(:startDate AS timestamp), o.orderPurchaseTimestamp))
           AND (o.orderPurchaseTimestamp <= COALESCE(CAST(:endDate AS timestamp), o.orderPurchaseTimestamp))
-          AND (c.customerCity = COALESCE(CAST(:city AS string), c.customerCity))
+          AND (LOWER(c.customerCity) = LOWER(COALESCE(CAST(:city AS string), c.customerCity)))
           AND (o.productCategoryNameEnglish = COALESCE(CAST(:category AS string), o.productCategoryNameEnglish))
     """)
     List<OrderCityView> findOrdersByFilters (

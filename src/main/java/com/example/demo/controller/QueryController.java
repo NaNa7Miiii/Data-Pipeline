@@ -32,9 +32,9 @@ public class QueryController {
     }
 
     @GetMapping("/chat")
-    public String chat() {
+    public String chat(@RequestParam(value = "message", defaultValue = "Tell me the GMV") String message) {
         return chatClient.prompt()
-                .user(String.valueOf(new UserMessage("Calculate GMV for startDate: 2017-12-01T00:00:00, endDate: 2017-12-31T23:59:59, city: sao paulo, category: housewares")))
+                .user(message)
                 .call()
                 .content();
     }
