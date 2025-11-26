@@ -8,7 +8,9 @@ import org.springframework.ai.tool.annotation.Tool;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -64,12 +66,29 @@ public class OrderInsightServiceImpl implements OrderInsightService {
         return calculateCategoryDistribution(loadOrders(request));
     }
 
+    // --- 关键修改：手动解析 String 到 LocalDateTime ---
     private List<OrderCityView> loadOrders(OrderInsightRequestDto request) {
-        LocalDateTime start = request.startDate();
-        LocalDateTime end = request.endDate();
+        // 使用 parseSmartDate 方法处理 String
+        LocalDateTime start = parseSmartDate(request.startDate(), true);
+        LocalDateTime end = parseSmartDate(request.endDate(), false);
+
         String city = request.city();
         String category = request.category();
         return orderRepository.findOrdersByFilters(start, end, city, category);
+    }
+
+    private LocalDateTime parseSmartDate(String dateStr, boolean isStart) {
+        if (dateStr == null || dateStr.isBlank()) return null;
+        try {
+            if (dateStr.contains("T")) {
+                return LocalDateTime.parse(dateStr);
+            }
+            LocalDate date = LocalDate.parse(dateStr);
+            return isStart ? date.atStartOfDay() : date.atTime(LocalTime.MAX);
+        } catch (Exception e) {
+            System.err.println("Date parsing failed for: " + dateStr);
+            return null;
+        }
     }
 
     private double computeGmv(List<OrderCityView> orders) {
@@ -78,7 +97,6 @@ public class OrderInsightServiceImpl implements OrderInsightService {
                 .sum();
     }
 
-    // function to calculate repeat rate (should be implemented via PRD file)
     private double calculateRepeatRate(List<OrderCityView> orders) {
         if (orders.isEmpty()) return 0.0;
         Map<String, Integer> customerOrderCounter = new HashMap<>();
@@ -93,8 +111,6 @@ public class OrderInsightServiceImpl implements OrderInsightService {
         return (double) repeatCustomers / totalCustomers;
     }
 
-    // function to calculate average fulfillment time (should be implemented via PRD file)
-    // average fulfillment time = avg([orderDeliveredCustomerDate - orderPurchaseTimestamp])
     private double calculateAvgFulfillmentTime(List<OrderCityView> orders) {
         OptionalDouble averageHours = orders.stream()
                 .filter(order -> order.getOrderDeliveredCustomerDate() != null && order.getOrderPurchaseTimestamp() != null)
@@ -105,7 +121,6 @@ public class OrderInsightServiceImpl implements OrderInsightService {
         return averageHours.orElse(0.0);
     }
 
-    // function to calculate city distribution (should be implemented via PRD file)
     private Map<String, Integer> calculateCityDistribution(List<OrderCityView> orders) {
         Map<String, Integer> distribution = new HashMap<>();
         for (OrderCityView order : orders) {
@@ -116,7 +131,6 @@ public class OrderInsightServiceImpl implements OrderInsightService {
         return distribution;
     }
 
-    // function to calculate category distribution (should be implemented via PRD file)
     private Map<String, Integer> calculateCategoryDistribution(List<OrderCityView> orders) {
         Map<String, Integer> distribution = new HashMap<>();
         for (OrderCityView order : orders) {
@@ -129,31 +143,27 @@ public class OrderInsightServiceImpl implements OrderInsightService {
 
     @Override
     public String getOrderStatus(String orderId) {
-
         String status = orderRepository.findStatusById(orderId);
         return status != null ? status : "Order not found";
     }
 
-
     @Override
     public Map<String, Double> getTopSellers(OrderInsightRequestDto request) {
+        LocalDateTime start = parseSmartDate(request.startDate(), true);
+        LocalDateTime end = parseSmartDate(request.endDate(), false);
 
         List<Map<String, Object>> results = orderRepository.findTopSellers(
-                request.startDate(),
-                request.endDate(),
+                start,
+                end,
                 5
         );
-
 
         Map<String, Double> topSellers = new HashMap<>();
         for (Map<String, Object> row : results) {
             String sellerId = (String) row.get("seller_id");
-
             Double sales = row.get("total_sales") != null ? ((Number) row.get("total_sales")).doubleValue() : 0.0;
             topSellers.put(sellerId, sales);
         }
         return topSellers;
     }
-
-
 }
