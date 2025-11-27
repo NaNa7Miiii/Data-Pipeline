@@ -4,7 +4,6 @@ import com.example.demo.dto.request.OrderInsightRequestDto;
 import com.example.demo.repository.OrderRepository;
 import com.example.demo.service.interfaces.OrderCityView;
 import com.example.demo.service.interfaces.OrderInsightService;
-import org.springframework.ai.tool.annotation.Tool;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -13,6 +12,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.OptionalDouble;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 @Service
 public class OrderInsightServiceImpl implements OrderInsightService {
@@ -20,46 +21,70 @@ public class OrderInsightServiceImpl implements OrderInsightService {
     public OrderRepository orderRepository;
 
     @Override
-    @Tool(description = "Calculates the Gross Merchandise Value (GMV) from a list of orders based on the provided filters.")
-    public double getGmv(OrderInsightRequestDto request) {
-        return computeGmv(loadOrders(request));
+    // returns the Gross Merchandise Value (GMV)
+    public double getGMV(OrderInsightRequestDto request) {
+        return computeGMV(loadOrders(request));
     }
 
     @Override
-    @Tool(description = "Counts the number of orders based on the provided filters.")
+    // returns the number of orders
     public int getOrderCount(OrderInsightRequestDto request) {
         return loadOrders(request).size();
     }
 
     @Override
-    @Tool(description = "Calculates the Average Order Value from a list of orders based on the provided filters.")
+    // returns the average order value
     public double getAvgOrderValue(OrderInsightRequestDto request) {
         List<OrderCityView> orders = loadOrders(request);
-        double gmv = computeGmv(orders);
+        double gmv = computeGMV(orders);
         int count = orders.size();
         return count == 0 ? 0 : gmv / count;
     }
 
     @Override
-    @Tool(description = "Calculates the Repeat Rate from a list of orders based on the provided filters.")
-    public double getRepeatRate(OrderInsightRequestDto request) {
-        return calculateRepeatRate(loadOrders(request));
-    }
-
-    @Override
-    @Tool(description = "Calculates the Average Fulfillment Hours from a list of orders based on the provided filters.")
+    // returns the average fulfillment hours, from purchase to delivered
     public double getAvgFulfillmentHours(OrderInsightRequestDto request) {
-        return calculateAvgFulfillmentTime(loadOrders(request));
+        return calculateAvgDuration(loadOrders(request), OrderCityView::getOrderPurchaseTimestamp, OrderCityView::getOrderDeliveredCustomerDate);
     }
 
     @Override
-    @Tool(description = "Calculates the City Distribution from a list of orders based on the provided filters.")
-    public Map<String, Integer> getCityDistribution(OrderInsightRequestDto request) {
-        return calculateCityDistribution(loadOrders(request));
+    // returns the average time in hours required for carrier pickup since order approved
+    public double getAvgCarrierPickupHours(OrderInsightRequestDto request) {
+        return calculateAvgDuration(loadOrders(request), OrderCityView::getOrderApprovedAt, OrderCityView::getOrderDeliveredCarrierDate);
     }
 
     @Override
-    @Tool(description = "Calculates the Category Distribution from a list of orders based on the provided filters.")
+    // returns the delivery SLA compliance rate: rate of orders that delivered on time (as per estimated delivery time)
+    public double getDeliverySLAComplianceRate(OrderInsightRequestDto request) { return deliverySLAComplianceRate(loadOrders(request)); }
+
+    @Override
+    // returns the cancelling rate of orders
+    public double getCancelRate(OrderInsightRequestDto request) { return cancelRate(loadOrders(request)); }
+
+    @Override
+    // returns the rate of orders that have a review score less than 3
+    public double getLowReviewScoreRate(OrderInsightRequestDto request) { return lowReviewScoreRate(loadOrders(request)); }
+
+    @Override
+    // returns the product category with the lowest average review scores
+    public String getLowestAvgReviewCategory(OrderInsightRequestDto request) {
+        return categoryAvgReviews(loadOrders(request)).entrySet().stream()
+                .min(Map.Entry.comparingByValue())
+                .map(Map.Entry::getKey)
+                .orElse(null);
+    }
+
+    @Override
+    // returns the product category with the highest average review scores
+    public String getHighestAvgReviewCategory(OrderInsightRequestDto request) {
+        return categoryAvgReviews(loadOrders(request)).entrySet().stream()
+                .max(Map.Entry.comparingByValue())
+                .map(Map.Entry::getKey)
+                .orElse(null);
+    }
+
+    @Override
+    // returns the product category distribution or orders
     public Map<String, Integer> getCategoryDistribution(OrderInsightRequestDto request) {
         return calculateCategoryDistribution(loadOrders(request));
     }
@@ -72,48 +97,34 @@ public class OrderInsightServiceImpl implements OrderInsightService {
         return orderRepository.findOrdersByFilters(start, end, city, category);
     }
 
-    private double computeGmv(List<OrderCityView> orders) {
+    private double computeGMV(List<OrderCityView> orders) {
         return orders.stream()
                 .mapToDouble(o -> o.getPrice() == null ? 0.0 : o.getPrice())
                 .sum();
     }
 
-    // function to calculate repeat rate (should be implemented via PRD file)
-    private double calculateRepeatRate(List<OrderCityView> orders) {
-        if (orders.isEmpty()) return 0.0;
-        Map<String, Integer> customerOrderCounter = new HashMap<>();
-        for (OrderCityView order: orders) {
-            customerOrderCounter.put(order.getCustomerId(),
-                    customerOrderCounter.getOrDefault(order.getCustomerId(), 0) + 1);
-        }
-        long repeatCustomers = customerOrderCounter.values().stream()
-                .filter(count -> count > 1)
-                .count();
-        int totalCustomers = customerOrderCounter.size();
-        return (double) repeatCustomers / totalCustomers;
-    }
+
 
     // function to calculate average fulfillment time (should be implemented via PRD file)
     // average fulfillment time = avg([orderDeliveredCustomerDate - orderPurchaseTimestamp])
-    private double calculateAvgFulfillmentTime(List<OrderCityView> orders) {
+//    private double calculateAvgFulfillmentTime(List<OrderCityView> orders) {
+//        OptionalDouble averageHours = orders.stream()
+//                .filter(order -> order.getOrderDeliveredCustomerDate() != null && order.getOrderPurchaseTimestamp() != null)
+//                .mapToLong(order -> java.time.Duration.between(
+//                        order.getOrderPurchaseTimestamp(),
+//                        order.getOrderDeliveredCustomerDate()).toHours())
+//                .average();
+//        return averageHours.orElse(0.0);
+//    }
+
+    private double calculateAvgDuration(List<OrderCityView> orders, Function<OrderCityView, LocalDateTime> start, Function<OrderCityView, LocalDateTime> end) {
         OptionalDouble averageHours = orders.stream()
                 .filter(order -> order.getOrderDeliveredCustomerDate() != null && order.getOrderPurchaseTimestamp() != null)
                 .mapToLong(order -> java.time.Duration.between(
-                        order.getOrderPurchaseTimestamp(),
-                        order.getOrderDeliveredCustomerDate()).toHours())
+                        start.apply(order),
+                        end.apply(order)).toHours())
                 .average();
         return averageHours.orElse(0.0);
-    }
-
-    // function to calculate city distribution (should be implemented via PRD file)
-    private Map<String, Integer> calculateCityDistribution(List<OrderCityView> orders) {
-        Map<String, Integer> distribution = new HashMap<>();
-        for (OrderCityView order : orders) {
-            String city = order.getCustomerCity();
-            if (city == null) continue;
-            distribution.put(city, distribution.getOrDefault(city, 0) + 1);
-        }
-        return distribution;
     }
 
     // function to calculate category distribution (should be implemented via PRD file)
@@ -125,5 +136,44 @@ public class OrderInsightServiceImpl implements OrderInsightService {
             distribution.put(category, distribution.getOrDefault(category, 0) + 1);
         }
         return distribution;
+    }
+
+    private double cancelRate(List<OrderCityView> orders) {
+        long cancelled = orders.stream()
+                .filter(order -> order.getReviewScore() != null && order.getOrderStatus().equals("canceled"))
+                .count();
+        int count = orders.size();
+        return count == 0 ? 0 : (double) cancelled / count;
+    }
+
+    private double lowReviewScoreRate(List<OrderCityView> orders) {
+        long lowScores = orders.stream()
+                .filter(order -> order.getReviewScore() != null && order.getReviewScore() < 3)
+                .count();
+        long count = orders.stream()
+                .filter(order -> order.getReviewScore() != null)
+                .count();
+        return count == 0 ? 0 : (double) lowScores / count;
+    }
+
+    private Map<String, Double> categoryAvgReviews(List<OrderCityView> orders) {
+        return orders.stream()
+                .filter(order -> order.getReviewScore() != null)
+                .collect(Collectors.groupingBy(
+                        OrderCityView::getProductCategoryNameEnglish,
+                        Collectors.averagingDouble(OrderCityView::getReviewScore)
+                ));
+    }
+
+//    count(delivered date <= estimated delivery date) / count(delivered)
+    private double deliverySLAComplianceRate(List<OrderCityView> orders) {
+        long delivered = orders.stream()
+                .filter(order -> order.getOrderStatus() != null && order.getOrderStatus().equals("delivered"))
+                .count();
+        long onTime = orders.stream()
+                .filter(order -> order.getOrderStatus() != null && order.getOrderStatus().equals("delivered"))
+                .filter(order -> order.getOrderDeliveredCustomerDate().isBefore(order.getOrderEstimatedDeliveryDate()))
+                .count();
+        return delivered == 0 ? 0 : (double) onTime / delivered;
     }
 }

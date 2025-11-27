@@ -15,15 +15,20 @@ public interface OrderRepository extends JpaRepository<Order, Integer> {
                o.customerId as customerId,
                c.customerCity as customerCity,
                o.price as price,
+               o.orderStatus as orderStatus,
                o.orderPurchaseTimestamp as orderPurchaseTimestamp,
+               o.orderApprovedAt as orderApprovedAt,
+               o.orderDeliveredCarrierDate as orderDeliveredCarrierDate,
                o.orderDeliveredCustomerDate as orderDeliveredCustomerDate,
-               o.productCategoryNameEnglish as productCategoryNameEnglish
+               o.orderEstimatedDeliveryDate as orderEstimatedDeliveryDate,
+               o.productCategoryNameEnglish as productCategoryNameEnglish,
+               o.reviewScore as reviewScore
         FROM Order o
         JOIN Customer c ON o.customerId = c.customerId
         WHERE (o.orderPurchaseTimestamp >= COALESCE(:startDate, o.orderPurchaseTimestamp))
           AND (o.orderPurchaseTimestamp <= COALESCE(:endDate, o.orderPurchaseTimestamp))
-          AND (c.customerCity = COALESCE(:city, c.customerCity))
-          AND (o.productCategoryNameEnglish = COALESCE(:category, o.productCategoryNameEnglish))
+          AND (:city = '' OR c.customerCity = COALESCE(:city, c.customerCity))
+          AND (:category = '' OR o.productCategoryNameEnglish = COALESCE(:category, o.productCategoryNameEnglish))
     """)
     List<OrderCityView> findOrdersByFilters (
             @Param("startDate") LocalDateTime startDate,
