@@ -24,6 +24,6 @@ public class SellerQueryTools {
             "where CR <= 0.4 indicates low concentration, 0.4 < CR <= 0.7 indicates medium concentration, and 0.7 < CR <= 1 indicates high concentration.")
     public double getConcentrationRatio(OrderInsightRequestDto request) { return service.getConcentrationRatio(request); }
 
-    @Tool(description = "Calculates the city distribution of customers from a list of orders based on the provided filters.")
+    @Tool(description = "Calculates the city distribution of sellers from a list of orders based on the provided filters.")
     public Map<String, Integer> getSellerCityDistribution(OrderInsightRequestDto request) { return service.getSellerCityDistribution(request); }
 }
